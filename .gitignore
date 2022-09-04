@@ -1,4 +1,4 @@
-#1398/06/17---12:00
+#1398/08/17---12:00
 
 import numpy as np
 import pandas as pd
@@ -44,9 +44,6 @@ df=pd.read_csv('E:/data/Project/nk.csv')
 >>> sum(df['title'].isna())
 3267
 '''
-
-
-
 
 np.unique(df['title_en'])
 
@@ -118,14 +115,7 @@ df['category'].loc[df['title_en']=='TS']='Toy & Travel'
 #df.to_excel('E:/data/Project/section-1.xlsx')
 
 
-
-
-
-
-
 df1=df.groupby('category').agg({"category":['count']})
-
-
 
 '''
 category
@@ -184,10 +174,6 @@ df.loc[df['comment'].isna(),'comment']=''
 df.loc[df['title'].isna(),'title']=''
 
 
-
-
-
-
 d1=df.loc[df['category']=='Digital Product']
 
 d1.index=np.arange(0,29494)
@@ -198,7 +184,6 @@ Digital_Product=d1.copy()
 
 
 d1=d1.iloc[0:1000,:]
-
 
 
 d2=df.loc[df['category']=='Cosmetic & Hygienic']
@@ -239,11 +224,6 @@ A1=d1[['not_verified','rejected','verified','no_idea','not_recommended','recomme
 A1=A1.iloc[0:1000,:]
 
 
-
-
-
-
-
 t1=d1[['title','comment']]
 
 t1['comment']=t1['title'].str.cat(t1['comment'],sep="  ")
@@ -261,13 +241,9 @@ t1=t1.iloc[0:1000,:]
 
 #t1=t1.iloc[0:300,:]
 
-
-
 stemmer=Stemmer()
 
 normalizer=Normalizer()
-
-
 
 t1['comment'] = t1['comment'].agg(lambda x:re.sub('[^\w\s]','',x))
 
@@ -282,10 +258,6 @@ t1['comment'] = t1['comment'].agg(lambda x:re.sub('[AaBbCcDdEeFfGgHhIiJjKkLlMmNn
 t1['comment'] = t1['comment'].agg(lambda x:normalizer.normalize(x))
 
 #t1['comment'] = t1['comment'].agg(lambda x:stemmer.stem(x))
-
-
-
-
 
 
 #after mining 40 good word (vocab=word_counts[word_counts>=40]):
@@ -396,9 +368,6 @@ a_counts
 
 #so we delete this word
 t1['comment'] = t1['comment'].agg(lambda x:re.sub('ارزش','',x))
-
-
-
 
 
 b=t1['comment'].agg(lambda x:re.findall('بد\s\w*',x))
@@ -541,35 +510,20 @@ t1['words'] =t1['comment'].agg(lambda x:[x for x in word_tokenize(x)])
 
 #t1['lemmatize']= t1['lemmatize'].agg(lambda x:([lemmatizer.lemmatize(x) for x in x.split()]))
 
-
-
-
-
 word_counts=t1['words'].agg(lambda x:' '.join(x))
 
 word_counts=word_counts.str.split(expand=True).stack().value_counts()
 
-
-
-
 #vocab=word_counts[word_counts>=30](SELECTED)
 
-
-
 vocab=pd.read_excel('E:/data/Project/vocab_1000(132).xlsx')#cleaned vocab(30)
-
 
 
 s1=set(vocab.words)
 
 #s1=set(vocab.index)
 
-
-
 vocabs=pd.Series(list(s1))
-
-
-
 
 allfeatures=np.zeros((t1.shape[0],vocabs.shape[0]))
 
@@ -579,10 +533,7 @@ for i in np.arange(vocabs.shape[0]):
 
 t1feature=(pd.DataFrame(allfeatures))
 
-
-
 #t1_features=(pd.DataFrame(allfeatures))
-
 
 # t1_features.to_csv('E:/data/Project/t1_features(1000,132).csv')
 
@@ -658,10 +609,7 @@ plt.figure(2)
 plt.pie(tg1[('label','count')],labels=tg1.index,colors=('red','green'),explode=exp)
 
 
-
-
 #section 3 
-
 
 stopwords = pd.read_excel('E:/data/Project/stopwords.xlsx')
 stops=stopwords['stops'].tolist()
@@ -702,10 +650,6 @@ plt.pie(dis_defects['repeat'],labels=dis_defects['items'],explode=exp)
 
 
 
-
-
-
-
 #section 4
 
 from scipy.cluster.hierarchy import dendrogram, linkage,fcluster
@@ -736,24 +680,17 @@ A1['label']=cluster_labels
 Digital_Product['label']=A1['label']
 
 
-
 Digital_Product['label'].loc[Digital_Product['label']==1]='satisfied'
 Digital_Product['label'].loc[Digital_Product['label']==2]='dissatisfied'
 Digital_Product['label'].loc[Digital_Product['label']==3]='middle'
 
 #Digital_Product.to_excel('E:/data/Project/Digital_Product.xlsx')
 
-
-
 DP=Digital_Product.groupby('label').agg({"label":['count']})
-
-
 
 
 exp=np.zeros(3)
 exp[0]=0.3
 plt.figure(6)
 plt.pie(DP[('label','count')],labels=DP.index,explode=exp)
-
-
 
