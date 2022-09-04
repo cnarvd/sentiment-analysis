@@ -1,129 +1,759 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+#1398/06/17---12:00
 
-# C extensions
-*.so
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import hazm as hz
+import arabic_reshaper as ar
+import nltk
+import re
+from hazm import Normalizer
+# from bidi.algorithm import get_display
+from hazm import sent_tokenize, word_tokenize
+from hazm import Stemmer , Lemmatizer
+from hazm import POSTagger
+from hazm import DependencyParser
+from hazm import *
+from sklearn.cluster import KMeans
+from sklearn.metrics import confusion_matrix,silhouette_samples, silhouette_score
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
+d=pd.read_csv('E:/data/Project/nk.csv')
 
-# Translations
-*.mo
-*.pot
+df=pd.read_csv('E:/data/Project/nk.csv')
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
 
-# Flask stuff:
-instance/
-.webassets-cache
+#df-prepricessing
 
-# Scrapy stuff:
-.scrapy
 
-# Sphinx documentation
-docs/_build/
+'''
+>>> sum(df['product_id'].isna())
+0
+>>> sum(df['product_title'].isna())
+0
+>>> sum(df['title_en'].isna())
+0
+>>> sum(df['user_id'].isna())
+0
+>>> sum(df['likes'].isna())
+0
+>>> sum(df['dislikes'].isna())
+0
+>>> sum(df['title'].isna())
+3267
+'''
 
-# PyBuilder
-target/
 
-# Jupyter Notebook
-.ipynb_checkpoints
 
-# IPython
-profile_default/
-ipython_config.py
 
-# pyenv
-.python-version
+np.unique(df['title_en'])
 
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
+df['category']=np.zeros(df.shape[0])
 
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
-__pypackages__/
 
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
+df.loc[df['title_en']=='AC',['product_title']]
+df['category'].loc[df['title_en']=='AC']='Digital Product'
 
-# SageMath parsed files
-*.sage.py
+df.loc[df['title_en']=='AV',['product_title']]
+df['category'].loc[df['title_en']=='AV']='Digital Product'
 
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+df.loc[df['title_en']=='BC',['product_title']]
+df['category'].loc[df['title_en']=='BC']='Baby & Kid'
 
-# Spyder project settings
-.spyderproject
-.spyproject
+df.loc[df['title_en']=='DF',['product_title']]
+df['category'].loc[df['title_en']=='DF']='Foodstuffs'
 
-# Rope project settings
-.ropeproject
+df.loc[df['title_en']=='FA',['product_title']]
+df['category'].loc[df['title_en']=='FA']= 'Clothing and Fashion'
 
-# mkdocs documentation
-/site
+df.loc[df['title_en']=='FF',['product_title']]
+df['category'].loc[df['title_en']=='FF']='Foodstuffs'
 
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
+df.loc[df['title_en']=='GC',['product_title']]
+df['category'].loc[df['title_en']=='GC']= 'Others'
 
-# Pyre type checker
-.pyre/
+df.loc[df['title_en']=='GF',['product_title']]
+df['category'].loc[df['title_en']=='GF']= 'Others'
+
+df.loc[df['title_en']=='HA',['product_title']]
+df['category'].loc[df['title_en']=='HA']= 'Home & Kitchen'
+
+
+df.loc[df['title_en']=='HC',['product_title']]
+df['category'].loc[df['title_en']=='HC']='Cosmetic & Hygienic'
+
+df.loc[df['title_en']=='HW',['product_title']]
+df['category'].loc[df['title_en']=='HW']= 'Home & Kitchen'
+
+df.loc[df['title_en']=='IT',['product_title']]
+df['category'].loc[df['title_en']=='IT']='Digital Product'
+
+df.loc[df['title_en']=='MA',['product_title']]
+df['category'].loc[df['title_en']=='MA']='Stationery,Art & Books'
+
+
+df.loc[df['title_en']=='MO',['product_title']]
+df['category'].loc[df['title_en']=='MO']='Digital Product'
+
+
+df.loc[df['title_en']=='PA',['product_title']]
+df['category'].loc[df['title_en']=='PA']='Cosmetic & Hygienic'
+
+
+df.loc[df['title_en']=='PC',['product_title']]
+df['category'].loc[df['title_en']=='PC']='Cosmetic & Hygienic'
+
+
+df.loc[df['title_en']=='TC',['product_title']]
+df['category'].loc[df['title_en']=='TC']='Car,Tool & Offic'
+
+
+df.loc[df['title_en']=='TS',['product_title']]
+df['category'].loc[df['title_en']=='TS']='Toy & Travel'
+
+#bc and ts have not correctly clustered
+
+#df.to_excel('E:/data/Project/section-1.xlsx')
+
+
+
+
+
+
+
+df1=df.groupby('category').agg({"category":['count']})
+
+
+
+'''
+category
+آرايشي بهداشتي            19257
+اسباب بازي و سفر           7915
+خانه و آشپزخانه           14690
+خودرو-ابزار و اداري        9846
+لوازم التحرير هنر کتاب     6395
+متفرقه                       6
+مد و پوشاک                10465
+مواد غذايي                 1408
+کالاي ديجيتال             29494
+کودک و نوزاد                524
+Name: category, dtype: int64
+'''
+
+
+exp=np.zeros(10)
+exp[0]=0.3
+plt.figure(1)
+plt.pie(df1[('category','count')],labels=df1.index,explode=exp)
+
+
+
+
+
+df['recommend'].loc[df['recommend']=='\\N']='no_idea'
+
+
+df.loc[df['advantages'].isna(),'advantages']='بدون نظر'
+df['advantages'].loc[df['advantages']=='["ندارد"]']='بدون نظر'
+df['advantages'].loc[df['advantages']=='["نداره"]']='بدون نظر'
+df['advantages'].loc[df['advantages']=='["هیچی"]']='بدون نظر'
+df['advantages'].loc[df['advantages']=='["هيچ"]']='بدون نظر'
+df['advantages'].loc[df['advantages']=='["ندیدم"]']='بدون نظر'
+
+
+
+
+
+df['disadvantages'].loc[df['disadvantages'].isna()]='بدون نظر'
+df['disadvantages'].loc[df['disadvantages']=='["ندارد"]']='بدون نظر'
+df['disadvantages'].loc[df['disadvantages']=='["نداره"]']='بدون نظر'
+df['disadvantages'].loc[df['disadvantages']=='["هیچی"]']='بدون نظر'
+df['disadvantages'].loc[df['disadvantages']=='["هيچ"]']='بدون نظر'
+df['disadvantages'].loc[df['disadvantages']=='["ندیدم"]']='بدون نظر'
+
+
+
+df['advantages'] = df['advantages'].agg(lambda x: (len(re.findall('"',x)))/2)
+
+df['disadvantages'] = df['disadvantages'].agg(lambda x: (len(re.findall('"',x)))/2)
+
+
+df.loc[df['comment'].isna(),'comment']=''
+df.loc[df['title'].isna(),'title']=''
+
+
+
+
+
+
+d1=df.loc[df['category']=='Digital Product']
+
+d1.index=np.arange(0,29494)
+
+Digital_Product=d1.copy()
+
+# d1.to_excel('E:/data/Project/Digital_Product.xlsx')
+
+
+d1=d1.iloc[0:1000,:]
+
+
+
+d2=df.loc[df['category']=='Cosmetic & Hygienic']
+
+
+#d1-prepricessing
+
+d1.index=np.arange(0,1000)
+
+# d1.index=np.arange(0,29494)
+
+d1['comment_importance']=d1['likes']-d1['dislikes']
+
+A=pd.get_dummies(d1['verification_status'])
+d1=pd.concat([d1,A],1)
+
+B=pd.get_dummies(d1['recommend'])
+d1=pd.concat([d1,B],1)
+
+d1['advantages-disadvantages']=d1['advantages']-d1['disadvantages']
+
+
+d1['product_quality']=np.zeros(d1.shape[0])
+
+d1['product_quality'].loc[d1['advantages-disadvantages']<=9]='very_good'
+d1['product_quality'].loc[d1['advantages-disadvantages']<5]='good'
+d1['product_quality'].loc[d1['advantages-disadvantages']<2]='usual'
+d1['product_quality'].loc[d1['advantages-disadvantages']<-1]='bad'
+d1['product_quality'].loc[d1['advantages-disadvantages']<-4]='very_bad'
+
+C=pd.get_dummies(d1['product_quality'])
+C=C[['very_bad','bad','usual','good','very_good']]
+d1=pd.concat([d1,C],1)
+
+A1=d1[['not_verified','rejected','verified','no_idea','not_recommended','recommended','very_bad','bad','usual','good','very_good']]
+
+
+A1=A1.iloc[0:1000,:]
+
+
+
+
+
+
+
+t1=d1[['title','comment']]
+
+t1['comment']=t1['title'].str.cat(t1['comment'],sep="  ")
+
+
+t1.index=np.arange(0,1000)
+# t1.index=np.arange(0,29494)
+
+
+#t1.dropna(axis=0,inplace=True)
+
+t1=t1.iloc[0:1000,:]
+
+#t1=t1.iloc[0:2000,:]
+
+#t1=t1.iloc[0:300,:]
+
+
+
+stemmer=Stemmer()
+
+normalizer=Normalizer()
+
+
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('[^\w\s]','',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('[\d]','',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('[\r\n]','',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('[\u200c]','',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('[AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz]','',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:normalizer.normalize(x))
+
+#t1['comment'] = t1['comment'].agg(lambda x:stemmer.stem(x))
+
+
+
+
+
+
+#after mining 40 good word (vocab=word_counts[word_counts>=40]):
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('خوبی','خوب',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('خوبیه','خوب',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('خوبه','خوب',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('عالیه','عالي',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('عالی','عالي',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('عالی','عالي',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('راضیم','راضی',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('مشکلی','مشکل',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('کمی','کم',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('کاملا','کامل',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('بخریدش','بخرید',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('نخریدش','نخرید',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('نمیخرمش','نمیخرم',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('اگه','اگر',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('خریدم','خرید',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('خریدش','خرید',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('دارمش','دارم',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('زیادی','زیاد',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('صداش','صدا',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('صدای','صدا',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('قیمتش','قیمت',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('کمی','کم',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('داشته','داشت',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('شارژش','شارژ',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('باتری','باطری',x))
+
+#t1['comment'] = t1['comment'].agg(lambda x:re.sub('نمیخرم','نمیخرم',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('بهتره','بهتر',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('نمی‌کنم','نمیکنم',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('‌ندارد','نداره',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('بدترین','بدتر',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('مناسبی','مناسب',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('مناسبه','مناسب',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('ضعفی','ضعف',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('نیس','نیست ',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('باکیفیت','کیفیت',x))
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('نمی‌خوره','نمیخوره',x))
+
+                          
+
+
+
+
+
+a=t1['comment'].agg(lambda x:re.findall('ارزش\s\w*',x))
+a=a.agg(lambda x:' '.join(x))
+a=pd.Series(a)
+a_counts=a.str.split(expand=True).stack().value_counts()
+
+'''
+a_counts
+ارزش         51
+خرید         27
+نداره         7
+داره          5
+خریدن         2
+تفاوت         1
+بیشتری        1
+نسبت          1
+گارانتی       1
+دارد          1
+دارهاگر       1
+هم            1
+خریدنداره     1
+پولیو         1
+لایف          1
+'''
+
+
+
+#so we delete this word
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('ارزش','',x))
+
+
+
+
+
+b=t1['comment'].agg(lambda x:re.findall('بد\s\w*',x))
+b=b.agg(lambda x:' '.join(x))
+b=pd.Series(b)
+b_counts=b.str.split(expand=True).stack().value_counts()
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('بد','',x))
+
+
+
+
+bs=t1['comment'].agg(lambda x:re.findall('بسیار\s\w*',x))
+bs=bs.agg(lambda x:' '.join(x))
+bs=pd.Series(bs)
+bs_counts=bs.str.split(expand=True).stack().value_counts()
+
+
+
+
+qr=t1['comment'].agg(lambda x:re.findall('خراب\s\w*',x))
+qr=qr.agg(lambda x:' '.join(x))
+qr=pd.Series(qr)
+qr_counts=qr.str.split(expand=True).stack().value_counts()
+
+
+qu=t1['comment'].agg(lambda x:re.findall('خوب\s\w*',x))
+qu=qu.agg(lambda x:' '.join(x))
+qu=pd.Series(qu)
+qu_counts=qu.str.split(expand=True).stack().value_counts()
+
+
+qe=t1['comment'].agg(lambda x:re.findall('خیلی\s\w*',x))
+qe=qe.agg(lambda x:' '.join(x))
+qe=pd.Series(qe)
+qe_counts=qe.str.split(expand=True).stack().value_counts()
+
+
+dr=t1['comment'].agg(lambda x:re.findall('درست\s\w*',x))
+dr=dr.agg(lambda x:' '.join(x))
+dr=pd.Series(dr)
+dr_counts=dr.str.split(expand=True).stack().value_counts()
+
+
+ra=t1['comment'].agg(lambda x:re.findall('راحت\s\w*',x))
+ra=ra.agg(lambda x:' '.join(x))
+ra=pd.Series(ra)
+ra_counts=ra.str.split(expand=True).stack().value_counts()
+
+
+rz= t1['comment'].agg(lambda x:re.findall('راضی\s\w*',x))
+rz=rz.agg(lambda x:' '.join(x))
+rz=pd.Series(rz)
+rz_counts=rz.str.split(expand=True).stack().value_counts()
+
+
+
+zi= t1['comment'].agg(lambda x:re.findall('زیاد\s\w*',x))
+zi=zi.agg(lambda x:' '.join(x))
+zi=pd.Series(zi)
+zi_counts=zi.str.split(expand=True).stack().value_counts()
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('زیاد','',x))
+
+
+zf= t1['comment'].agg(lambda x:re.findall('ضعف\s\w*',x))
+zf=zf.agg(lambda x:' '.join(x))
+zf=pd.Series(zf)
+zf_counts=zf.str.split(expand=True).stack().value_counts()
+
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('ضعف','',x))
+
+
+
+
+k= t1['comment'].agg(lambda x:re.findall('کیفیت\s\w*',x))
+k=k.agg(lambda x:' '.join(x))
+k=pd.Series(k)
+k_counts=k.str.split(expand=True).stack().value_counts()
+
+
+mo= t1['comment'].agg(lambda x:re.findall('مناسب\s\w*',x))
+mo=mo.agg(lambda x:' '.join(x))
+mo=pd.Series(mo)
+mo_counts=mo.str.split(expand=True).stack().value_counts()
+
+
+mk= t1['comment'].agg(lambda x:re.findall('مشکل\s\w*',x))
+mk=mk.agg(lambda x:' '.join(x))
+mk=pd.Series(mk)
+mk_counts=mk.str.split(expand=True).stack().value_counts()
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('مشکل','',x))
+
+
+ns= t1['comment'].agg(lambda x:re.findall('\w*\sنیست',x))
+ns=ns.agg(lambda x:' '.join(x))
+ns=pd.Series(ns)
+ns_counts=ns.str.split(expand=True).stack().value_counts()
+
+
+
+
+hi= t1['comment'].agg(lambda x:re.findall('هیچ\s\w*',x))
+hi=hi.agg(lambda x:' '.join(x))
+hi=pd.Series(hi)
+hi_counts=hi.str.split(expand=True).stack().value_counts()
+t1['comment'] = t1['comment'].agg(lambda x:re.sub('هیچ','',x))
+'''
+
+
+
+stopwords = pd.read_excel('E:/data/Project/stops/stopwordper.xlsx')
+stopwords['stops'] =stopwords['stops'].agg(lambda x:normalizer.normalize(x))
+stops=stopwords['stops'].tolist()
+
+
+'''
+#t1['wordcount']=t1['comment'].agg(lambda x: len([x for x in x.split()]))
+
+#t1['stopwordscount'] = t1['comment'].agg(lambda x: len([x for x in word_tokenize(x) if x in stops]))
+
+t1['words'] =t1['comment'].agg(lambda x:[x for x in word_tokenize(x)])
+
+#t1['words'] =t1['comment'].agg(lambda x:[x for x in word_tokenize(x) if x not in stops])
+
+
+#t1.to_excel('E:/data/Project/t1.xlsx')
+
+#t1['wordcount']=t1['words'].agg(lambda x: len(x))
+
+#stemmer=Stemmer()
+#t1['stems'] =t1['words'].agg(lambda x:' '.join(x))
+
+#t1['stems']= t1['stems'].agg(lambda x:([stemmer.stem(x) for x in x.split()]))
+
+
+#lemmatizer=Lemmatizer()
+
+#t1['lemmatize'] =t1['words'].agg(lambda x:' '.join(x))
+
+#t1['lemmatize']= t1['lemmatize'].agg(lambda x:([lemmatizer.lemmatize(x) for x in x.split()]))
+
+
+
+
+
+word_counts=t1['words'].agg(lambda x:' '.join(x))
+
+word_counts=word_counts.str.split(expand=True).stack().value_counts()
+
+
+
+
+#vocab=word_counts[word_counts>=30](SELECTED)
+
+
+
+vocab=pd.read_excel('E:/data/Project/vocab_1000(132).xlsx')#cleaned vocab(30)
+
+
+
+s1=set(vocab.words)
+
+#s1=set(vocab.index)
+
+
+
+vocabs=pd.Series(list(s1))
+
+
+
+
+allfeatures=np.zeros((t1.shape[0],vocabs.shape[0]))
+
+for i in np.arange(vocabs.shape[0]):
+  allfeatures[t1['comment'].agg(lambda x:sum([y==vocabs[i] for y in x.split()])>0),i]=1
+
+
+t1feature=(pd.DataFrame(allfeatures))
+
+
+
+#t1_features=(pd.DataFrame(allfeatures))
+
+
+# t1_features.to_csv('E:/data/Project/t1_features(1000,132).csv')
+
+extract=list(s1)
+
+t1['extract(132)']=t1['words'].agg(lambda x:' '.join(x))
+t1['extract(132)'] =t1['extract(132)'].agg(lambda x:[word for word in word_tokenize(x) if word in extract])
+t1['comment(132)'] =t1['extract(132)'].agg(lambda x:' '.join(x))
+
+
+
+
+#kmedoids
+from pyclustering.cluster.kmedoids import kmedoids
+from pyclustering.utils.metric import distance_metric, type_metric
+from pyclustering.cluster.clarans import clarans
+from pyclustering.utils import timedcall
+
+
+t1featurelist=t1feature.values.tolist()
+
+t1featurevalues=t1feature.values
+
+initial_medoids = [50,200]#optimal
+
+
+kmedoids_instance = kmedoids(t1featurelist, initial_medoids)
+
+kmedoids_instance.process()
+clusters = kmedoids_instance.get_clusters()
+medoids = kmedoids_instance.get_medoids()
+
+zero=pd.DataFrame(clusters[0])
+zero['label']=0
+one=pd.DataFrame(clusters[1])
+one['label']=1
+#two=pd.DataFrame(clusters[2])
+#two['label']=2
+
+cluster_labels=pd.concat([zero,one],0)                                          
+#cluster_labels=pd.concat([zero,one,two],0)                                          
+cluster_labels.index=np.arange(0,t1feature.shape[0])
+cluster_labels.columns=['index','label']
+cluster_labels=cluster_labels.sort_values('index',ascending=True)
+cluster_labels.index=np.arange(0,t1feature.shape[0])
+
+
+t1['kmd(50,200)']=cluster_labels['label']
+
+
+#t1.to_excel('E:/data/Project/t1.xlsx')
+
+#t1.loc[t1['comment(132)']=='']
+
+
+# t1=pd.read_excel('E:/data/Project/t1.xlsx')#corrected
+
+
+t1['label']=np.zeros(t1.shape[0])
+
+t1['label'].loc[t1['kmd(50,200)']==0]='satisfied'
+
+t1['label'].loc[t1['kmd(50,200)']==1]='dissatisfied'
+
+
+
+tg1=t1.groupby('label').agg({"label":['count']})
+
+
+exp=np.zeros(2)
+exp[0]=0.3
+plt.figure(2)
+plt.pie(tg1[('label','count')],labels=tg1.index,colors=('red','green'),explode=exp)
+
+
+
+
+#section 3 
+
+
+stopwords = pd.read_excel('E:/data/Project/stopwords.xlsx')
+stops=stopwords['stops'].tolist()
+
+t1['defects'] = t1['comment'].agg(lambda x:[x for x in word_tokenize(x) if x not in stops])
+t1['defects']=t1['defects'].agg(lambda x:' '.join(x))
+
+n=60
+m=60
+
+exp[0]=0.3
+
+
+stf_defects=t1['defects'].loc[t1['label']=='satisfied']
+stf_defects=stf_defects.str.split(expand=True).stack().value_counts()
+stf_defects=stf_defects[stf_defects>=n]
+#stf_defects.to_excel('E:/data/Project/stf_defects.xlsx')
+# stf_defects = pd.read_excel('E:/data/Project/stf_defects.xlsx',encoding='utf-8')
+
+stf_defects=pd.DataFrame({'items':stf_defects.index, 'repeat':stf_defects.values})
+
+exp=np.zeros(11)
+plt.figure(3)
+plt.pie(stf_defects['repeat'],labels=stf_defects['items'],explode=exp)
+
+
+
+dis_defects=t1['defects'].loc[t1['label']=='dissatisfied']
+dis_defects=dis_defects.str.split(expand=True).stack().value_counts()
+dis_defects=dis_defects[dis_defects>=m]
+#dis_defects.to_excel('E:/data/Project/dis_defects.xlsx')
+# dis_defects = pd.read_excel('E:/data/Project/dis_defects.xlsx',encoding='utf-8')
+dis_defects=pd.DataFrame({'items':dis_defects.index, 'repeat':dis_defects.values})
+
+exp=np.zeros(7)
+plt.figure(4)
+plt.pie(dis_defects['repeat'],labels=dis_defects['items'],explode=exp)
+
+
+
+
+
+
+
+#section 4
+
+from scipy.cluster.hierarchy import dendrogram, linkage,fcluster
+from sklearn.preprocessing import scale
+from sklearn.metrics import silhouette_samples, silhouette_score
+
+
+D=pd.get_dummies(t1['label'])
+
+A1=pd.concat([A1,D],1)
+
+#A1.to_csv('E:/data/Project/A1.csv')
+
+clusterer = linkage(A1,'complete',metric='correlation')
+
+dendrogram(clusterer)
+plt.figure(5)
+
+#plt.show()
+
+cluster_labels = fcluster(clusterer,1.2,criterion='distance')
+np.unique(cluster_labels)
+
+A1['label']=cluster_labels
+
+#A1.to_csv('E:/data/Project/A1.csv')
+
+Digital_Product['label']=A1['label']
+
+
+
+Digital_Product['label'].loc[Digital_Product['label']==1]='satisfied'
+Digital_Product['label'].loc[Digital_Product['label']==2]='dissatisfied'
+Digital_Product['label'].loc[Digital_Product['label']==3]='middle'
+
+#Digital_Product.to_excel('E:/data/Project/Digital_Product.xlsx')
+
+
+
+DP=Digital_Product.groupby('label').agg({"label":['count']})
+
+
+
+
+exp=np.zeros(3)
+exp[0]=0.3
+plt.figure(6)
+plt.pie(DP[('label','count')],labels=DP.index,explode=exp)
+
+
+
